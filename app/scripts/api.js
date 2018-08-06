@@ -102,6 +102,10 @@ const api = function api(context) {
       return p;
     },
 
+    getMinMaxValue(viewId, trackId, ignoreFixedScale = false) {
+      return self.getMinMaxValue(viewId, trackId, ignoreFixedScale);
+    },
+
     /**
      * Retrieve a sharable link for the current view config
      *
@@ -132,6 +136,10 @@ const api = function api(context) {
       self.setState({
         draggingHappening: null,
       });
+    },
+
+    setTrackValueScale(viewId, trackId, minValue, maxValue) {
+      self.setTrackValueScale(viewId, trackId, minValue, maxValue);
     },
 
     /**

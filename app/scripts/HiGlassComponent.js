@@ -43,6 +43,7 @@ import {
   fillInMinWidths,
   forwardEvent,
   getTrackByUid,
+  getTrackObjById,
   getTrackPositionByUid,
   hasParent,
   // loadChromInfos,
@@ -3117,6 +3118,17 @@ class HiGlassComponent extends React.Component {
     this.showHoverMenu(evt);
   }
 
+  getMinMaxValue(viewId, trackId, ignoreFixedScale) {
+    const track = getTrackObjById(this.tiledPlots, viewId, trackId);
+
+    if (!track) return undefined;
+
+    return [
+      track.minVisibleValue(ignoreFixedScale),
+      track.maxVisibleValue(ignoreFixedScale)
+    ];
+  }
+
   /**
    * Show a menu displaying some information about the track under it
    */
@@ -3209,6 +3221,30 @@ class HiGlassComponent extends React.Component {
    */
   mouseDownHandler(evt) {
 
+  }
+
+  setTrackValueScale(viewId, trackId, minValue, maxValue) {
+    const tiledPlot = viewId
+      ? this.tiledPlots[viewId]
+      : Object.values(this.tiledPlots)[0];
+
+    if (!tiledPlot) {
+      if (!viewId) console.warn('No views available.');
+      else console.warn(`Could't find view with id "${viewId}"`);
+      return;
+    }
+
+    const track = tiledPlot.trackRenderer.trackDefObjects[trackId].trackObject;
+
+    if (track.setFixedValueScaleMin && track.setFixedValueScaleMax) {
+      track.setFixedValueScaleMin(minValue);
+      track.setFixedValueScaleMax(maxValue);
+
+      track.rerender(track.options, true);
+      track.animate();
+    } else {
+      console.warn('Track doesn\'t support fixed value scales.');
+    }
   }
 
   setChromInfo(chromInfoPath, callback) {
