@@ -1004,6 +1004,7 @@ class TrackRenderer extends React.Component {
           this.activeTransitions -= 1;
         });
     } else {
+      // console.log('setting zoom', notify);
       setZoom();
     }
 
