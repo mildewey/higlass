@@ -8,6 +8,7 @@ import SearchField from './SearchField';
 
 import {
   absToChr,
+  colorToHex,
   pixiTextToSvg,
   showMousePosition,
   svgLine
@@ -17,9 +18,17 @@ const TICK_WIDTH = 200;
 const TICK_HEIGHT = 6;
 const TICK_TEXT_SEPARATION = 2;
 const TICK_COLOR = 0x777777;
+const HEX_WHITE = colorToHex('#FFFFFF');
 
 class HorizontalChromosomeLabels extends PixiTrack {
-  constructor(scene, dataConfig, handleTilesetInfoReceived, options, animate, chromInfoPath) {
+  constructor(
+    scene,
+    dataConfig,
+    handleTilesetInfoReceived,
+    options,
+    animate,
+    chromInfoPath
+  ) {
     super(scene, options);
 
     this.searchField = null;
@@ -31,14 +40,26 @@ class HorizontalChromosomeLabels extends PixiTrack {
 
     this.options = options;
 
-    this.textFontSize = '12px';
+    this.textFontSize = 12;
     this.textFontFamily = 'Arial';
     this.textFontColor = '#777777';
     this.pixiTextConfig = {
-      fontSize: this.textFontSize,
+      fontSize: +this.options.fontSize
+        ? `${+this.options.fontSize}px`
+        : `${this.textFontSize}px`,
       fontFamily: this.textFontFamily,
-      fill: this.options.color || this.textFontColor
+      fill: this.options.color || this.textFontColor,
+      lineJoin: 'round',
+      stroke: '#ffffff',
+      strokeThickness: 1
     };
+
+    this.tickWidth = TICK_WIDTH;
+    this.tickHeight = TICK_HEIGHT;
+    this.tickTextSeparation = TICK_TEXT_SEPARATION;
+    this.tickColor = this.options.tickColor
+      ? colorToHex(this.options.tickColor)
+      : TICK_COLOR;
 
     this.animate = animate;
 
@@ -61,32 +82,42 @@ class HorizontalChromosomeLabels extends PixiTrack {
 
       this.texts = [];
 
-      for (let i = 0; i < this.chromInfo.cumPositions.length; i++) {
-        const textStr = this.chromInfo.cumPositions[i].chr;
-        this.gTicks[textStr] = new PIXI.Graphics();
-
-        // create the array that will store tick TEXT objects
-        if (!this.tickTexts[textStr]) { this.tickTexts[textStr] = []; }
-
-        const text = new PIXI.Text(textStr, this.pixiTextConfig);
-
-        text.anchor.x = 0.5;
-        text.anchor.y = 0.5;
-        text.visible = false;
-
-        // give each string a random hash so that some get hidden
-        // when there's overlaps
-        text.hashValue = Math.random();
-
-        this.pMain.addChild(text);
-        this.pMain.addChild(this.gTicks[textStr]);
-
-        this.texts.push(text);
-      }
+      this.drawChromLabels();
 
       this.draw();
       this.animate();
     });
+  }
+
+  drawChromLabels() {
+    if (!this.chromInfo) return;
+
+    this.texts = [];
+    this.pMain.removeChildren();
+
+    for (let i = 0; i < this.chromInfo.cumPositions.length; i++) {
+      const textStr = this.chromInfo.cumPositions[i].chr;
+      this.gTicks[textStr] = new PIXI.Graphics();
+
+      // create the array that will store tick TEXT objects
+      if (!this.tickTexts[textStr]) { this.tickTexts[textStr] = []; }
+
+      const text = new PIXI.Text(textStr, this.pixiTextConfig);
+
+      // This seems to be unnecessary
+      // text.anchor.x = 0;
+      // text.anchor.y = 1;
+      // text.visible = false;
+
+      // give each string a random hash so that some get hidden
+      // when there's overlaps
+      text.hashValue = Math.random();
+
+      this.pMain.addChild(text);
+      this.pMain.addChild(this.gTicks[textStr]);
+
+      this.texts.push(text);
+    }
   }
 
   rerender(options, force) {
@@ -96,6 +127,19 @@ class HorizontalChromosomeLabels extends PixiTrack {
 
     this.prevOptions = strOptions;
     this.options = options;
+
+    this.pixiTextConfig = {
+      fontSize: +this.options.fontSize
+        ? `${+this.options.fontSize}px`
+        : this.pixiTextConfig.fontSize,
+      fill: this.options.color || this.pixiTextConfig.fill
+    };
+
+    this.tickColor = this.options.tickColor
+      ? colorToHex(this.options.tickColor)
+      : TICK_COLOR;
+
+    this.drawChromLabels();
 
     super.rerender(options, force);
 
@@ -112,8 +156,8 @@ class HorizontalChromosomeLabels extends PixiTrack {
   drawTicks(cumPos) {
     const graphics = this.gTicks[cumPos.chr];
 
-    this.gTicks[cumPos.chr].visible = true;
-    this.gTicks[cumPos.chr].clear();
+    graphics.visible = true;
+    graphics.clear();
 
     const chromLen = +this.chromInfo.chromLengths[cumPos.chr];
 
@@ -122,7 +166,7 @@ class HorizontalChromosomeLabels extends PixiTrack {
       this._xScale(cumPos.pos + chromLen), this.dimensions[0]
     );
 
-    const numTicks = (vpRight - vpLeft) / TICK_WIDTH;
+    const numTicks = (vpRight - vpLeft) / this.tickWidth;
 
     // what is the domain of this chromosome that is visible?
     const xScale = scaleLinear()
@@ -137,6 +181,20 @@ class HorizontalChromosomeLabels extends PixiTrack {
     const tickFormat = xScale.tickFormat(numTicks);
     const tickTexts = this.tickTexts[cumPos.chr];
 
+    const tickHeight = this.options.fontIsAligned
+      ? ((+this.options.fontSize || this.textFontSize) / 2)
+      : this.tickHeight;
+
+    const flipTextSign = this.flipText ? -1 : 1;
+
+    const xPadding = this.options.fontIsAligned
+      ? flipTextSign * 4
+      : 0;
+
+    const yPadding = this.options.fontIsAligned
+      ? 0
+      : tickHeight + this.tickTextSeparation;
+
     while (tickTexts.length <= ticks.length) {
       const newText = new PIXI.Text('', this.pixiTextConfig);
       tickTexts.push(newText);
@@ -146,24 +204,34 @@ class HorizontalChromosomeLabels extends PixiTrack {
     let i = 0;
     while (i < ticks.length) {
       tickTexts[i].visible = true;
-      tickTexts[i].anchor.x = 0.5;
+
+      tickTexts[i].anchor.x = this.options.fontIsAligned ? 0 : 0.5;
       tickTexts[i].anchor.y = 1;
 
       if (this.flipText) tickTexts[i].scale.x = -1;
 
       // draw the tick labels
-      tickTexts[i].x = this._xScale(cumPos.pos + ticks[i]);
-      tickTexts[i].y = this.dimensions[1] - (TICK_HEIGHT + TICK_TEXT_SEPARATION);
+      tickTexts[i].x = this._xScale(cumPos.pos + ticks[i]) + xPadding;
+      tickTexts[i].y = this.dimensions[1] - yPadding;
 
       tickTexts[i].text = ticks[i] === 0
-        ? `${cumPos.chr}:1`
-        : `${cumPos.chr}:${tickFormat(ticks[i])}`;
+        ? `${cumPos.chr}: 1`
+        : `${cumPos.chr}: ${tickFormat(ticks[i])}`;
 
-      graphics.lineStyle(1, TICK_COLOR);
+      graphics.lineStyle(1, this.tickColor);
+
+      const x = this._xScale(cumPos.pos + ticks[i]);
 
       // draw the tick lines
-      graphics.moveTo(this._xScale(cumPos.pos + ticks[i]), this.dimensions[1]);
-      graphics.lineTo(this._xScale(cumPos.pos + ticks[i]), this.dimensions[1] - TICK_HEIGHT);
+      graphics.moveTo(x, this.dimensions[1]);
+      graphics.lineTo(x, this.dimensions[1] - tickHeight);
+
+      if (this.options.fontIsAligned) {
+        graphics.lineTo(
+          x + (2 * flipTextSign),
+          this.dimensions[1] - tickHeight
+        );
+      }
 
       i += 1;
     }
@@ -181,9 +249,7 @@ class HorizontalChromosomeLabels extends PixiTrack {
   draw() {
     this.allTexts = [];
 
-    if (!this.texts) { return; }
-
-    if (!this.searchField) { return; }
+    if (!this.texts || !this.searchField) return;
 
     const x1 = absToChr(this._xScale.domain()[0], this.chromInfo);
     const x2 = absToChr(this._xScale.domain()[1], this.chromInfo);
@@ -198,6 +264,10 @@ class HorizontalChromosomeLabels extends PixiTrack {
       this.gTicks[this.chromInfo.cumPositions[i].chr].visible = false;
     }
 
+    const yPadding = this.options.fontIsAligned
+      ? 0
+      : this.tickHeight + this.tickTextSeparation;
+
     // iterate over each chromosome
     for (let i = x1[3]; i <= x2[3]; i++) {
       const xCumPos = this.chromInfo.cumPositions[i];
@@ -208,26 +278,13 @@ class HorizontalChromosomeLabels extends PixiTrack {
 
       const text = this.texts[i];
 
+      text.anchor.x = this.options.fontIsAligned ? 0 : 0.5;
       text.anchor.y = 1;
       text.x = viewportMidX;
-      text.y = this.dimensions[1] - TICK_TEXT_SEPARATION - TICK_HEIGHT;
+      text.y = this.dimensions[1] - yPadding;
       text.updateTransform();
 
-      if (this.flipText) { text.scale.x = -1; }
-
-      // const bbox = text.getBounds();
-      // text.y -= bbox.height;
-
-      // make sure the chrosome label fits in the x range
-      /* Not necessary because chromosome labels only get drawn
-            if (viewportMidX + bbox.width / 2  > this.dimensions[0]) {
-                text.x -= (viewportMidX + bbox.width / 2) - this.dimensions[0];
-            } else if (viewportMidX - bbox.width / 2 < 0) {
-                //
-                text.x -= (viewportMidX - bbox.width / 2);
-            }
-            */
-
+      if (this.flipText) text.scale.x = -1;
 
       const numTicksDrawn = this.drawTicks(xCumPos);
 
@@ -285,8 +342,8 @@ class HorizontalChromosomeLabels extends PixiTrack {
   }
 
   exportSVG() {
-    let track = null,
-      base = null;
+    let track = null;
+    let base = null;
 
     if (super.exportSVG) {
       [base, track] = super.exportSVG();
@@ -302,18 +359,16 @@ class HorizontalChromosomeLabels extends PixiTrack {
     output.setAttribute('transform',
       `translate(${this.position[0]},${this.position[1]})`);
 
-    for (const text of this.allTexts) {
-      if (!text.text.visible) continue;
+    this.allTexts
+      .filter(text => text.text.visible)
+      .forEach((text) => {
+        const g = pixiTextToSvg(text.text);
+        output.appendChild(g);
+      });
 
-      const g = pixiTextToSvg(text.text);
-      output.appendChild(g);
-    }
-
-    for (let key in this.tickTexts) {
-      for (let text of this.tickTexts[key]) {
-        if (!text.visible)
-          continue;
-
+    Object.values(this.tickTexts)
+      .filter(text => text.visible)
+      .forEach((text) => {
         let g = pixiTextToSvg(text);
         output.appendChild(g);
 
@@ -321,14 +376,13 @@ class HorizontalChromosomeLabels extends PixiTrack {
           text.x,
           this.dimensions[1],
           text.x,
-          this.dimensions[1] - TICK_HEIGHT,
+          this.dimensions[1] - this.tickHeight,
           1,
-          TICK_COLOR,
+          this.tickColor,
         );
 
         output.appendChild(g);
-      }
-    }
+      });
 
     return [base, track];
   }
