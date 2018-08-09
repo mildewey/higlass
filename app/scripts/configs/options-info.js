@@ -336,7 +336,6 @@ export const OPTIONS_INFO = {
   colorEncoding: {
     name: 'Color Encode Annotations',
     inlineOptions: YES_NO
-    },
   },
 
   fontIsAligned: {
