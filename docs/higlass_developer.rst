@@ -268,6 +268,52 @@ Get the min and max value of the (visible) data of a track.
   const [minVal, maxVal] = hgv.getMinMaxValue('myView', 'myTrack');
 
 
+Restrict range selection
+------------------------
+
+The following enpoint restricts the size of range selection equally for 1D or
+2D tracks to a certain length (specified in absolute coordinates).
+
+**Prototype**
+
+``setRangeSelection1dSize(minSize, maxSize)``
+
+**Parameters**
+
+``minSize: number [default: 0]``
+    Minimum range selection. ``undefined`` unsets the value.
+
+``maxSize: number [default: Infinity]``
+    Maximum range selection. ``undefined`` unsets the value.
+
+**Examples:**
+
+.. code-block:: javascript
+
+  hgv.activateTool('select'); // Activate select tool
+  hgv.setRangeSelection1dSize(5000, 10000); // Force selections to be between 5 and 10 Kb
+
+
+Ensure integer range selection
+------------------------------
+
+The following two endpoints enable or disable forced integer range selections.
+
+**Prototype**
+
+``setRangeSelectionToInt()``
+
+``setRangeSelectionToFloat()``
+
+**Examples:**
+
+.. code-block:: javascript
+
+  hgv.activateTool('select'); // Activate select tool
+  hgv.setRangeSelectionToInt(); // Force selections to be integer
+  hgv.setRangeSelectionToFloat(); // Allow float range selections
+
+
 Reset the viewport
 ------------------
 
@@ -280,7 +326,7 @@ domains of your view config.
 
 **Parameters**
 
-``viewId: string [default: '']``
+``viewId: string``
     The view identifier. If you have only one view you can omit this parameter.
 
 **Examples:**
