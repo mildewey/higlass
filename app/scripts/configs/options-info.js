@@ -325,6 +325,13 @@ export const OPTIONS_INFO = {
       no: { name: 'No', value: false },
     },
   },
+  colorEncoding: {
+    name: 'Color Encode Annotations',
+    inlineOptions: {
+      yes: { name: 'Yes', value: true },
+      no: { name: 'No', value: false },
+    },
+  },
   axisPositionHorizontal: {
     name: 'Axis Position',
     inlineOptions: {
