@@ -982,10 +982,12 @@ export const TRACKS_INFO = [
     name: 'Chromosome Axis',
     thumbnail: null,
     availableOptions: [
+      'color',
       'showMousePosition',
       'mousePositionColor',
     ],
     defaultOptions: {
+      color: '#777777',
       showMousePosition: false,
       mousePositionColor: '#999999'
     },
