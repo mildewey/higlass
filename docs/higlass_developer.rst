@@ -4,6 +4,21 @@ Developer
 Public API
 ***********
 
+Available endpoints
+-------------------
+
+.. code-block:: javascript
+
+  import { HiGlassComponent, ChromosomeInfo, viewer } from 'higlass';
+
+HiGlass exports three endpoints for your convenience. ``viewer`` is the main
+endpoint to create a new HiGlass component. ``HiGlassComponent`` can be used
+to integrate HiGlass in your React application. ``ChromosomeInfo`` is a class
+for converting absolute coordinates to chromosome coordinates. It's used
+internally and made available to convert absolute range selection into
+chromosome range selections.
+
+
 Creating an inline HiGlass component
 ------------------------------------
 
@@ -72,6 +87,34 @@ GitHub repository
   function zoomTo() {
     hgv.zoomTo("aa", 1000000,2000000,1000000,2000000, 1000);
   }
+
+
+Creating a HiGlass component in your React app
+----------------------------------------------
+
+.. code-block:: javascript
+
+  <HiGlassComponent
+    options={options}
+    viewConfig={viewConfig}
+  >
+
+Use the ``HiGlassComponent`` to create a HiGlass instance in react. The
+``options`` prop is the same as explained above.
+
+**Example**
+
+.. code-block:: javascript
+
+  import { HiGlassComponent } from 'higlass';
+
+  const HiGlass = props => <HiGlassComponent
+    ref={props.onRef}
+    options={props.options}
+    viewConfig={props.viewConfig}
+  >
+
+  export default HiGlass;
 
 
 Setting the current view config
@@ -405,6 +448,7 @@ If it is not provided, the value is taken from the `exportViewUrl` value of the 
     })
     .catch((err) => { console.error('Something did not work. Sorry', err); })
 
+
 Obtaining ordered chromosome info
 ---------------------------------
 
@@ -413,13 +457,11 @@ and the order they are listed in a chromSizes file:
 
 .. code-block:: javascript
 
-    import {ChromosomeInfo} from 'higlass';
+  import { ChromosomeInfo } from 'higlass';
 
-    ChromosomeInfo(
-      'http://higlass.io/api/v1/chrom-sizes/?id=Ajn_ttUUQbqgtOD4nOt-IA',
-      (chromInfo) => {
-        console.log('chromInfo:', chromInfo);
-      });
+  const chromInfo = ChromosomeInfo(
+    'http://higlass.io/api/v1/chrom-sizes/?id=Ajn_ttUUQbqgtOD4nOt-IA',
+    (chromInfo) => { console.log('chromInfo:', chromInfo); });
 
 This will return a data structure with information about the chromosomes
 listed:
@@ -443,6 +485,15 @@ listed:
         ...
        ]
     }
+
+**Convert absolute to chromosomal coordinates:**
+
+.. code-block:: javascript
+
+  absPos = 257893;
+  chromPos = chromInfo.absToChr(absPos);
+
+
 
 Viewconfs
 *********
