@@ -267,6 +267,10 @@ Get the min and max value of the (visible) data of a track.
 
   const [minVal, maxVal] = hgv.getMinMaxValue('myView', 'myTrack');
 
+**Demos:**
+
+- `get-min-max-value.html <examples/get-min-max-value.html>`_
+
 
 Restrict range selection
 ------------------------
