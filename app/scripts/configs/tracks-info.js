@@ -1066,6 +1066,7 @@ export const TRACKS_INFO = [
     thumbnail: null,
     availableOptions: [
       'color',
+      'stroke',
       'fontSize',
       'fontIsAligned',
       'showMousePosition',
@@ -1073,6 +1074,7 @@ export const TRACKS_INFO = [
     ],
     defaultOptions: {
       color: '#777777',
+      stroke: '#FFFFFF',
       fontSize: 12,
       fontIsAligned: false,
       showMousePosition: false,
@@ -1088,10 +1090,18 @@ export const TRACKS_INFO = [
     name: 'Chromosome Axis',
     thumbnail: null,
     availableOptions: [
+      'color',
+      'stroke',
+      'fontSize',
+      'fontIsAligned',
       'showMousePosition',
       'mousePositionColor',
     ],
     defaultOptions: {
+      color: '#777777',
+      stroke: '#FFFFFF',
+      fontSize: 12,
+      fontIsAligned: false,
       showMousePosition: false,
       mousePositionColor: '#999999'
     },
