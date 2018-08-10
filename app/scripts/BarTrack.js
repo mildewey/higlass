@@ -196,7 +196,7 @@ class BarTrack extends HorizontalLine1DPixiTrack {
     }
   }
 
-  rerender(options) {
+  rerender(options, force) {
     if (options && options.colorRange) {
       if (options.colorRangeGradient) {
         this.setColorGradient(options.colorRange);
@@ -205,7 +205,7 @@ class BarTrack extends HorizontalLine1DPixiTrack {
       }
     }
 
-    super.rerender(options);
+    super.rerender(options, force);
   }
 
   draw() {
