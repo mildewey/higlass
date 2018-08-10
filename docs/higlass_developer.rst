@@ -247,7 +247,7 @@ Get the min and max value of the (visible) data of a track.
 
 **Prototype**
 
-``getMinMaxValue(viewId, trackId, ignoreFixedScale)``
+``getMinMaxValue(viewId, trackId, ignoreOffScreenValues, ignoreFixedScale)``
 
 **Parameters**
 
@@ -257,9 +257,16 @@ Get the min and max value of the (visible) data of a track.
 ``trackId: string``
     Track identifier (uid).
 
-``ignoreFixedScale: string [default: false]``
-    If ``true`` ignore fixed scaling and return the actual (not the visible)
-    min and max value.
+``ignoreOffScreenValues: bool [default: false]``
+    If ``true`` only truly visible values are considered. Otherwise the values
+    of visible tiles are used. Not that considering only the truly visible
+    values results in a roughly 10x slowdown (from 0.1 to 1 millisecond).
+
+``ignoreFixedScale: bool [default: false]``
+    If ``true`` potentially fixed scaled values are ignored. I.e., if the
+    absolute range is ``[1, 18]`` but you have fixed the output range to
+    ``[4, 5]`` you would normally retrieve ``[4, 5]``. Having this option set to
+    ``true`` retrieves the absolute ``[1, 18]`` range.
 
 **Examples:**
 
@@ -269,7 +276,7 @@ Get the min and max value of the (visible) data of a track.
 
 **Demos:**
 
-- `get-min-max-value.html <examples/get-min-max-value.html>`_
+- `Base example <examples/api-get-min-max-value.html>`_
 
 
 Restrict range selection
