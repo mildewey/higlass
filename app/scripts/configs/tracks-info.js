@@ -6,6 +6,7 @@ import {
   svgArrowheadDomainsIcon,
   svgGeneAnnotationsIcon,
   svgHorizontalLineIcon,
+  svgHorizontal1dHeatmap,
   svgVertical1DAxisIcon,
   svgVertical1DTilesIcon,
   svgVerticalGeneAnnotationsIcon,
@@ -213,7 +214,7 @@ export const TRACKS_INFO = [
     datatype: ['vector'],
     local: false,
     orientation: '1d-horizontal',
-    thumbnail: svgHorizontalLineIcon,
+    thumbnail: svgHorizontal1dHeatmap,
     availableOptions: [
       'labelPosition',
       'labelColor',
@@ -250,7 +251,7 @@ export const TRACKS_INFO = [
     datatype: ['vector'],
     local: false,
     orientation: '1d-vertical',
-    thumbnail: svgHorizontalLineIcon,
+    thumbnail: svgHorizontal1dHeatmap,
     availableOptions: [
       'labelPosition',
       'labelColor',
