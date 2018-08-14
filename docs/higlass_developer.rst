@@ -141,6 +141,7 @@ which is fulfilled when all of the data for the view is loaded.
     // the initial set of tiles has been loaded
   });
 
+
 Zooming to show all of the data
 -------------------------------
 
@@ -370,6 +371,7 @@ domains of your view config.
 
   hgv.resetViewport(); // Resets the first view
 
+
 Fix the value range of a 1D track
 ---------------------------------
 
@@ -509,6 +511,7 @@ HiGlass exposes the following event, which one can subscribe to via this method:
   const mmz = event => console.log('Moved', event);
   hgv.on('mouseMoveZoom', mmz);
 
+
 Unsubscribe from events
 -----------------------
 
@@ -529,6 +532,7 @@ The variables used in the following examples are coming from the above examples 
   hgv.off('viewConfig', viewConfigListener);
   hgv.off('mouseMoveZoom', mmz);
 
+
 Getters for the current HiGlass State
 -------------------------------------
 
@@ -543,6 +547,7 @@ HiGlass provides a set of accessors and exporters to retrieve data from HiGlass 
   const currentViewConfig = hgv.exportAsViewConfString();
   const pngSnapshot = hgv.exportAsPng();  // Data URI
   const svgSnapshot = hgv.exportAsSvg();  // XML string
+
 
 Get sharable link for current view config
 -----------------------------------------

@@ -333,6 +333,7 @@ export const OPTIONS_INFO = {
       24: { name: '24px', value: 24 },
     },
   },
+
   colorEncoding: {
     name: 'Color Encode Annotations',
     inlineOptions: YES_NO

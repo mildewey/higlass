@@ -8,6 +8,7 @@ import { colorDomainToRgbaArray, colorToHex, gradient } from './utils';
 
 const HEX_WHITE = colorToHex('#FFFFFF');
 
+
 class BarTrack extends HorizontalLine1DPixiTrack {
   constructor(...args) {
     super(...args);
@@ -56,12 +57,12 @@ class BarTrack extends HorizontalLine1DPixiTrack {
   }
 
   updateTile(tile) {
-    if (!(
-      tile.valueScale &&
-      this.scale &&
-      this.scale.minValue === tile.scale.minValue &&
-      this.scale.maxValue === tile.scale.maxValue
-    )) {
+    if (
+      !tile.valueScale
+      || !this.scale
+      || this.scale.minValue !== tile.scale.minValue
+      || this.scale.maxValue !== tile.scale.maxValue
+    ) {
       // not rendered using the current scale, so we need to rerender
       this.renderTile(tile);
     }
@@ -110,6 +111,7 @@ class BarTrack extends HorizontalLine1DPixiTrack {
     }
 
     const stroke = colorToHex(this.options.lineStrokeColor || 'blue');
+
     // this scale should go from an index in the data array to
     // a position in the genome coordinates
     const tileXScale = scaleLinear()
@@ -170,13 +172,6 @@ class BarTrack extends HorizontalLine1DPixiTrack {
       // this data is in the last tile and extends beyond the length
       // of the coordinate system
       if (tileXScale(i) > this.tilesetInfo.max_pos[0]) break;
-
-      graphics.drawRect(
-        xPos,
-        yPos,
-        width,
-        height
-      );
 
       if (this.colorScale && !this.options.colorRangeGradient) {
         const rgbIdx = Math.round(colorScale(tileValues[i] + pseudocount));
