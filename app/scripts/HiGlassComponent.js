@@ -47,6 +47,7 @@ import {
   getTrackPositionByUid,
   hasParent,
   // loadChromInfos,
+  numericifyVersion,
   objVals,
   positionedTracksToAllTracks,
   scalesCenterAndK,
@@ -77,6 +78,13 @@ const VIEW_HEADER_HEIGHT = 20;
 class HiGlassComponent extends React.Component {
   constructor(props) {
     super(props);
+
+    // Check React version
+    if (numericifyVersion(React.version) < 15.6) {
+      console.warn(
+        'HiGlass requires React v15.6 or higher. Current version: ', React.version
+      );
+    }
 
     this.pubSubs = [];
 
