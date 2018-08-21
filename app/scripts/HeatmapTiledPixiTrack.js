@@ -158,15 +158,14 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
 
     const relX = x - this.position[0];
     const relY = y - this.position[1];
-    let data = this.getVisibleRectangleData(relX - Math.ceil(this.dataLensSize / 2), 
+    let data = this.getVisibleRectangleData(relX - Math.ceil(this.dataLensSize / 2),
       relY - Math.ceil(this.dataLensSize / 2), this.dataLensSize, this.dataLensSize);
-    if (!data)
-      return;
+    if (!data) return;
 
     try {
       data = data.flatten().tolist();
     } catch (err) {
-
+      // Nothing
     }
 
     const dim = this.dataLensSize;
@@ -182,27 +181,21 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
 
     if (!data.length || !toRgb) return;
 
-    let center = [
+    const center = [
       Math.round(this._xScale.invert(relX)),
       Math.round(this._yScale.invert(relY))
     ];
-    let xRange = [
+    const xRange = [
       Math.round(this._xScale.invert(relX - this.dataLensLPad)),
       Math.round(this._xScale.invert(relX + this.dataLensRPad))
     ];
-    let yRange = [
+    const yRange = [
       Math.round(this._yScale.invert(relY - this.dataLensLPad)),
       Math.round(this._yScale.invert(relY + this.dataLensRPad))
     ];
 
-    if (this.chromInfo) {
-      center = center.map(pos => absToChr(pos, this.chromInfo).slice(0, 2));
-      xRange = xRange.map(pos => absToChr(pos, this.chromInfo).slice(0, 2));
-      yRange = yRange.map(pos => absToChr(pos, this.chromInfo).slice(0, 2));
-    }
-
     this.onMouseMoveZoom({
-      data, dim, toRgb, center, xRange, yRange, rel: !!this.chromInfo
+      data, dim, toRgb, center, xRange, yRange
     });
   }
 
@@ -602,8 +595,8 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
     );
     this.pColorbarArea.drawRect(0, 0, colorbarAreaWidth, colorbarAreaHeight);
 
-    if (!this.options) { 
-      this.options = { scaleStartPercent: 0, scaleEndPercent: 1 }; 
+    if (!this.options) {
+      this.options = { scaleStartPercent: 0, scaleEndPercent: 1 };
     }
     else {
       if (!this.options.scaleStartPercent) { this.options.scaleStartPercent = 0; }
@@ -794,7 +787,7 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
    * Get the data in the visible rectangle
    *
    * The parameter coordinates are in pixel coordinates
-   * 
+   *
    * @param {int} x: The upper left corner of the rectangle in pixel coordinates
    * @param {int} y: The upper left corner of the rectangle in pixel coordinates
    * @param {int} width: The width of the rectangle (pixels)
@@ -813,6 +806,8 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
 
     // BP resolution of a tile's bin (i.e., numbe of base pairs per bin / pixel)
     const tileRes = tileWidth / BINS_PER_TILE;
+    // console.log('tileWidth:', tileWidth);
+    return [];
 
     // the data domain of the currently visible region
     const xDomain = [this._xScale.invert(x), this._xScale.invert(x + width)]
@@ -834,13 +829,13 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
 
       // get the tile's position and width (in data coordinates)
       // if it's mirrored then we have to switch the position indeces
-      const {tileX, tileY, tileWidth, tileHeight} = 
+      const {tileX, tileY, tileWidth, tileHeight} =
         this.getTilePosAndDimensions(tile.tileData.zoomLevel,
           tilePos, BINS_PER_TILE);
       let tileData = tile.dataArray;
 
       if (tile.mirrored) {
-        tileData = tileData.T; 
+        tileData = tileData.T;
       }
 
       // calculate the tile's position in bins
@@ -1186,16 +1181,18 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
         this.tilesetInfo.max_width
       );
 
+      // console.log('ytiles');
       this.yTiles = tileProxy.calculateTiles(
         this.zoomLevel,
         this._yScale,
-        this.tilesetInfo.min_pos[1],
-        this.tilesetInfo.max_pos[1],
+        this.options.reverseYAxis ? -this.tilesetInfo.max_pos[1] : this.tilesetInfo.min_pos[1],
+        this.options.reverseYAxis ? -this.tilesetInfo.min_pos[1] : this.tilesetInfo.max_pos[1],
         this.tilesetInfo.max_zoom,
-        this.tilesetInfo.max_width
+        this.tilesetInfo.max_width1 || this.tilesetInfo.max_width
       );
     }
 
+    // console.log('this.xTiles:', this.xTiles, this.yTiles);
     this.setVisibleTiles(
       this.tilesToId(this.xTiles, this.yTiles, this.zoomLevel, this.mirrorTiles())
     );
@@ -1240,6 +1237,7 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
       positionText += '<br/>';
     }
 
+    console.log('getMouseOverHtml:');
     let data = null;
     try {
       data = this.getVisibleRectangleData(trackX, trackY, 1, 1).flatten().tolist();
@@ -1287,8 +1285,9 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
     const xTilePos = tilePos[0];
     const yTilePos = tilePos[1];
 
-    const minX = 0;
-    const minY = 0;
+    const minX = this.tilesetInfo.min_pos[0];
+    const minY = this.options.reverseYAxis ?
+      -this.tilesetInfo.max_pos[1] : this.tilesetInfo.min_pos[1];
 
     const tileWidth = this.tilesetInfo.max_width / (2 ** zoomLevel);
     const tileHeight = this.tilesetInfo.max_width / (2 ** zoomLevel);
