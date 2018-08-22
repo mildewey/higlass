@@ -65,7 +65,7 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
 
     this.fontSize = +this.options.fontSize || FONT_SIZE;
     this.geneLabelPos = this.options.geneLabelPosition || GENE_LABEL_POS;
-    this.geneRectHeight = +this.options.geneAnnoHeight || GENE_RECT_HEIGHT;
+    this.geneRectHeight = +this.options.geneAnnotationHeight || GENE_RECT_HEIGHT;
     this.geneTriangleHeight = 0.6 * this.geneRectHeight || TRIANGLE_HEIGHT;
     this.geneStrandSpacing = +this.options.geneStrandSpacing || GENE_STRAND_SPACING;
     this.geneStrandHSpacing = this.geneStrandSpacing / 2;
@@ -136,7 +136,7 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
     const tileIds = {};
     tiles.forEach((t) => { tileIds[t.tileId] = t; });
 
-    if (tile.tileData && this.drawnGenes[zoomLevel]) {
+    if (tile.tileData && tile.tileData.filter && this.drawnGenes[zoomLevel]) {
       tile.tileData
         .filter(td => this.drawnGenes[zoomLevel][td.fields[3]])
         .forEach((td) => {
@@ -173,7 +173,7 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
 
     this.fontSize = +this.options.fontSize || FONT_SIZE;
     this.geneLabelPos = this.options.geneLabelPosition || GENE_LABEL_POS;
-    this.geneRectHeight = +this.options.geneAnnoHeight || GENE_RECT_HEIGHT;
+    this.geneRectHeight = +this.options.geneAnnotationHeight || GENE_RECT_HEIGHT;
     this.geneTriangleHeight = 0.6 * this.geneRectHeight || TRIANGLE_HEIGHT;
     this.geneStrandHSpacing = this.geneStrandSpacing / 2;
     this.geneRectHHeight = this.geneRectHeight / 2;
@@ -317,6 +317,8 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
 
         const text = tile.texts[geneName];
 
+        if (!text) return;
+
         text.style = {
           fontSize: `${this.fontSize}px`,
           fontFamily: FONT_FAMILY,
@@ -347,7 +349,9 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
     return zoomLevel;
   }
 
-  drawExons(graphics, txStart, txEnd, exonStarts, exonEnds, chrOffset, yMiddle, strand) {
+  drawExons(
+    graphics, txStart, txEnd, exonStarts, exonEnds, chrOffset, yMiddle, strand
+  ) {
     const exonOffsetStarts = exonStarts.split(',').map(x => +x + chrOffset);
     const exonOffsetEnds = exonEnds.split(',').map(x => +x + chrOffset);
 
@@ -428,6 +432,14 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
     }
 
     return polys;
+  }
+
+  /**
+  * Position a gene annotation's text at its expected location.
+  * @param {td}: A piece of tile data
+  */
+  positionText(td) {
+
   }
 
   draw() {
@@ -585,8 +597,7 @@ class HorizontalGeneAnnotationsTrack extends HorizontalTiled1DPixiTrack {
   setPosition(newPosition) {
     super.setPosition(newPosition);
 
-    this.pMain.position.y = this.position[1];
-    this.pMain.position.x = this.position[0];
+    [this.pMain.position.x, this.pMain.position.y] = this.position;
   }
 
   setDimensions(newDimensions) {
