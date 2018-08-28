@@ -1,4 +1,4 @@
-import nj from 'numjs';
+import ndarray from 'ndarray';
 import { brushY } from 'd3-brush';
 import { range } from 'd3-array';
 import { format } from 'd3-format';
@@ -19,6 +19,8 @@ import {
   colorToHex,
   download,
   mod,
+  ndarrayAssign,
+  ndarrayFlatten,
   objVals,
   rangeQuery2d,
   showMousePosition,
@@ -141,11 +143,8 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
    *
    * @param  {Number}  x  Relative X coordinate.
    * @param  {Number}  y  Relative Y coordinate
-   * @param  {Number}  z  Zoom level
    */
-  mouseMoveZoomHandler(
-    x = this.mouseX, y = this.mouseY, z = this.zoomLevel
-  ) {
+  mouseMoveZoomHandler(x = this.mouseX, y = this.mouseY) {
     if (
       typeof x === 'undefined'
       || typeof y === 'undefined'
@@ -158,12 +157,16 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
 
     const relX = x - this.position[0];
     const relY = y - this.position[1];
-    let data = this.getVisibleRectangleData(relX - Math.ceil(this.dataLensSize / 2),
-      relY - Math.ceil(this.dataLensSize / 2), this.dataLensSize, this.dataLensSize);
+    let data = this.getVisibleRectangleData(
+      relX - Math.ceil(this.dataLensSize / 2),
+      relY - Math.ceil(this.dataLensSize / 2),
+      this.dataLensSize,
+      this.dataLensSize
+    );
     if (!data) return;
 
     try {
-      data = data.flatten().tolist();
+      data = ndarrayFlatten(data);
     } catch (err) {
       // Nothing
     }
@@ -309,11 +312,13 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
       // const pixelsHeight = (this._yScale.domain()[1]  - this._yScale.domain()[0])
       // / currentResolution;
 
-      const data = this.getVisibleRectangleData(0, 0, this.dimensions[0], this.dimensions[1]);
+      const data = this.getVisibleRectangleData(
+        0, 0, this.dimensions[0], this.dimensions[1]
+      );
       const output = {
         bounds: [this._xScale.domain(), this._yScale.domain()],
         dimensions: data.shape,
-        data: data.flatten().tolist(),
+        data: ndarrayFlatten(data),
       };
 
       download('data.json', JSON.stringify(output));
@@ -821,23 +826,27 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
     const binWidth = Math.ceil((xDomain[1] - xDomain[0]) / tileRes);
     const binHeight = Math.ceil((yDomain[1] - yDomain[0]) / tileRes);
 
-    let out = nj.zeros([binHeight, binWidth]);
-    out.slice([0,binHeight],[0,binWidth]).assign(NaN, false);
+    const out = ndarray(
+      new Array(binHeight * binWidth).fill(NaN),
+      [binHeight, binWidth]
+    );
 
     // iterate through all the visible tiles
-    this.visibleAndFetchedTiles().map(tile => {
-      let tilePos = tile.mirrored ? [tile.tileData.tilePos[1], tile.tileData.tilePos[0]] :
-        tile.tileData.tilePos;
+    this.visibleAndFetchedTiles().forEach((tile) => {
+      const tilePos = tile.mirrored
+        ? [tile.tileData.tilePos[1], tile.tileData.tilePos[0]]
+        : tile.tileData.tilePos;
 
       // get the tile's position and width (in data coordinates)
       // if it's mirrored then we have to switch the position indeces
-      const {tileX, tileY, tileWidth, tileHeight} =
+      const { tileX, tileY, tileWidth, tileHeight } =
         this.getTilePosAndDimensions(tile.tileData.zoomLevel,
           tilePos, BINS_PER_TILE);
+
       let tileData = tile.dataArray;
 
       if (tile.mirrored) {
-        tileData = tileData.T;
+        tileData = tileData.transpose(1, 0);
       }
 
       // calculate the tile's position in bins
@@ -860,16 +869,16 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
       const tileSliceHeight = tileSliceYEnd - tileSliceYStart;
 
       // the region is outside of this tile
-      if (tileSliceWidth < 0 || tileSliceHeight < 0)
-        return;
+      if (tileSliceWidth < 0 || tileSliceHeight < 0) return;
 
-      const tileSlice = tileData.slice(
-        [tileSliceYStart, tileSliceYStart + tileSliceHeight],
-        [tileSliceXStart, tileSliceXStart + tileSliceWidth])
-
-      out.slice([tileYOffset, tileYOffset + tileSliceHeight],
-        [tileXOffset, tileXOffset + tileSliceWidth])
-        .assign(tileSlice, false);
+      ndarrayAssign(
+        out
+          .hi(tileYOffset + tileSliceHeight, tileXOffset + tileSliceWidth)
+          .lo(tileYOffset, tileXOffset),
+        tileData
+          .hi(tileSliceYStart + tileSliceHeight, tileSliceXStart + tileSliceWidth)
+          .lo(tileSliceYStart, tileSliceXStart)
+      );
     });
 
     return out;
@@ -885,13 +894,16 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
   initTile(tile) {
     super.initTile(tile);
 
-    if (this.scale.minValue == null || this.scale.maxValue == null)
-      // no data present
-      return;
+    // no data present
+    if (this.scale.minValue == null || this.scale.maxValue == null) return;
 
     // prepare the data for fast retrieval in getVisibleRectangleData
-    if (tile.tileData.dense.length == BINS_PER_TILE * BINS_PER_TILE)
-      tile.dataArray = nj.array(Array.from(tile.tileData.dense)).reshape([BINS_PER_TILE, BINS_PER_TILE]);
+    if (tile.tileData.dense.length === BINS_PER_TILE * BINS_PER_TILE) {
+      tile.dataArray = ndarray(
+        Array.from(tile.tileData.dense),
+        [BINS_PER_TILE, BINS_PER_TILE]
+      );
+    }
 
     this.renderTile(tile);
   }
@@ -1239,21 +1251,22 @@ class HeatmapTiledPixiTrack extends TiledPixiTrack {
       positionText += '<br/>';
     }
 
-    console.log('getMouseOverHtml:');
     let data = null;
     try {
-      data = this.getVisibleRectangleData(trackX, trackY, 1, 1).flatten().tolist();
+      data = this.getVisibleRectangleData(trackX, trackY, 1, 1).get(0, 0);
     } catch (err) {
       return '';
     }
 
-    if (this.options && this.options.heatmapValueScaling == 'log')
-      if (data[0] > 0)
-        return positionText + "<b>Value:</b> 1e" + format(".3f")(Math.log(data[0]));
-      else
-      return positionText + '<b>Value:</b> N/A';
-    else
-      return positionText + "<b>Value:</b> " + format(".3f")(data[0]);
+    if (this.options && this.options.heatmapValueScaling === 'log') {
+      if (data > 0) {
+        return `${positionText}<b>Value:</b> 1e${format('.3f')(Math.log(data))}`;
+      } else if (data === 0) {
+        return `${positionText}<b>Value:</b> 0`;
+      }
+      return `${positionText}<b>Value:</b> N/A`;
+    }
+    return `${positionText}<b>Value:</b> ${format('.3f')(data)}`;
   }
 
   /**
