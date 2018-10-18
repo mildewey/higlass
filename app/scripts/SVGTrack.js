@@ -46,6 +46,11 @@ class SVGTrack extends Track {
     this.draw();
   }
 
+  defaultMouseClickHander(evt) {
+    console.log('SVG click', evt);
+    // TODO: let the API register callbacks.
+  }
+
   remove() {
     this.gMain.remove();
     this.gMain = null;
