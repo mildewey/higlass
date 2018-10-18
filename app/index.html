@@ -420,5 +420,7 @@ const hgApi = hglib.viewer(
 hgApi.on('view', () => {
   console.log('View Config changed');
 });
+
+hgApi.registerRegionClickCallback('c1');
 </script>
 </html>

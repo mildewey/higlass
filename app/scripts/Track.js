@@ -27,6 +27,10 @@ class Track {
     this.pubSubs.push(
       pubSub.subscribe('app.mouseMove', this.defaultMouseMoveHandler.bind(this))
     );
+    // subscribe to mouseClick events
+    this.pubSubs.push(
+      pubSub.subscribe('app.mouseClick', this.defaultMouseClickHandler.bind(this))
+    );
   }
 
   /**
@@ -130,15 +134,23 @@ class Track {
 
   /*
    * A blank handler for MouseMove / Zoom events. Should be overriden
-   * by individual tracks to provide 
+   * by individual tracks to provide
    *
-   * @param {obj} evt: 
+   * @param {obj} evt:
    *
    * @returns nothing
    */
-  defaultMouseMoveHandler(evt) {
+  defaultMouseMoveHandler(evt) {}
 
-  }
+  /*
+   * A blank handler for MouseClick events. Should be overriden
+   * by individual tracks to provide desired behavior.
+   *
+   * @param {obj} evt:
+   *
+   * @returns nothing
+   */
+  defaultMouseClickHandler(evt) {console.log('click', evt)}
 
   remove() {
     // Clear all pubSub subscriptions
