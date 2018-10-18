@@ -246,6 +246,7 @@ class HiGlassComponent extends React.Component {
     this.requestReceivedHandlerBound = this.requestReceivedHandler.bind(this);
     this.onWheelHandlerBound = this.onWheelHandler.bind(this);
     this.mouseMoveHandlerBound = this.mouseMoveHandler.bind(this);
+    this.mouseClickHandlerBound = this.mouseClickHandler.bind(this);
     this.onMouseLeaveHandlerBound = this.onMouseLeaveHandler.bind(this);
   }
 
@@ -3011,7 +3012,7 @@ class HiGlassComponent extends React.Component {
         'coordinates).',
       ].join(' '));
       return;
-    } 
+    }
 
     if (!(+start2Abs >= 0)) {
       start2Abs = start1Abs;
@@ -3189,6 +3190,17 @@ class HiGlassComponent extends React.Component {
     );
 
     this.showHoverMenu(evt);
+  }
+
+  /**
+   * Handle mouseClick events by republishing the event using pubSub.
+   *
+   * @param {object}  e  Event object.
+   */
+  mouseClickHandler(e) {
+    pubSub.publish(
+      'app.mouseClick', e
+    );
   }
 
   getMinMaxValue(viewId, trackId, ignoreOffScreenValues, ignoreFixedScale) {
@@ -3658,6 +3670,7 @@ class HiGlassComponent extends React.Component {
         className="higlass"
         onMouseLeave={this.onMouseLeaveHandlerBound}
         onMouseMove={this.mouseMoveHandlerBound}
+        onClick={this.mouseClickHandlerBound}
         onWheel={this.onWheelHandlerBound}
         styleName={styleNames}
       >

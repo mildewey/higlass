@@ -41,6 +41,10 @@ const api = function api(context) {
       console.warn('Not implemented yet!');
     },
 
+    registerRegionClickCallback(uid) {
+      console.warn('TODO!');
+    },
+
     destroy() {
       ReactDOM.unmountComponentAtNode(self.topDiv.parentNode);
     },
@@ -534,12 +538,12 @@ const api = function api(context) {
      *   'rangeSelection',
      *   range => console.log('Selected', range)
      * );
-     * 
+     *
      * const viewConfigListenerId = hgv.on(
      *   'viewConfig',
      *   range => console.log('Selected', range)
      * );
-     * 
+     *
      *  const mmz = event => console.log('Moved', event);
      *  hgv.on('mouseMoveZoom', mmz);
      */

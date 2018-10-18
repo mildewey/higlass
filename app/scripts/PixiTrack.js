@@ -169,6 +169,11 @@ class PixiTrack extends Track {
     this.pLabel.addChild(this.labelText);
   }
 
+  defaultMouseClickHander(evt) {
+    console.log('click', evt);
+    // TODO: let the API register callbacks.
+  }
+
   setLabelText() {
     // will be drawn in draw() anyway
   }
