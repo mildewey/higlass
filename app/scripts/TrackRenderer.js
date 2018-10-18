@@ -55,6 +55,8 @@ import OSMTilesTrack from './OSMTilesTrack';
 import OSMTileIdsTrack from './OSMTileIdsTrack';
 import MapboxTilesTrack from './MapboxTilesTrack';
 
+import SVGTrack from './SVGTrack';
+
 // Utils
 import {
   colorToHex,
@@ -1707,6 +1709,9 @@ class TrackRenderer extends React.Component {
             () => this.currentProps.onNewTilesLoaded(track.uid),
           )
         );
+
+      case 'empty-svg':
+        return new SVGTrack();
 
       default: {
         // Check if a plugin track is available

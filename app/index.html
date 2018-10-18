@@ -291,6 +291,10 @@ const viewConfig = {
                 position: 'center',
                 width: 479,
                 height: 691
+              },
+              {
+                type: 'empty-svg',
+                uid: 'empty-svg-uid'
               }
             ],
             position: 'center',
@@ -421,6 +425,7 @@ hgApi.on('view', () => {
   console.log('View Config changed');
 });
 
-hgApi.registerRegionClickCallback('c1');
+const clickableTrack = hgApi.getTrackObject('aa', 'empty-svg-uid');
+console.log('TODO: Do something with: ', clickableTrack);
 </script>
 </html>

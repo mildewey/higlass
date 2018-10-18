@@ -1276,6 +1276,10 @@ export const TRACKS_INFO = [
       valueColumn: null
     },
   },
+  {
+    type: 'empty-svg',
+    datatype: ['nothing'],
+  }
 ];
 
 export default TRACKS_INFO;

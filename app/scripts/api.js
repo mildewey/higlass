@@ -41,12 +41,12 @@ const api = function api(context) {
       console.warn('Not implemented yet!');
     },
 
-    registerRegionClickCallback(uid) {
-      console.warn('TODO!');
-    },
-
     destroy() {
       ReactDOM.unmountComponentAtNode(self.topDiv.parentNode);
+    },
+
+    getTrackObject(viewUid, trackUid) {
+      return self.getTrackObject(viewUid, trackUid);
     },
 
     /**
