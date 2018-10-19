@@ -55,7 +55,7 @@ import OSMTilesTrack from './OSMTilesTrack';
 import OSMTileIdsTrack from './OSMTileIdsTrack';
 import MapboxTilesTrack from './MapboxTilesTrack';
 
-import SVGTrack from './SVGTrack';
+import EmptySVGTrack from './EmptySVGTrack';
 
 // Utils
 import {
@@ -1711,7 +1711,7 @@ class TrackRenderer extends React.Component {
         );
 
       case 'empty-svg':
-        return new SVGTrack();
+        return new EmptySVGTrack(this.svgElement);
 
       default: {
         // Check if a plugin track is available
