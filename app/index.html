@@ -427,6 +427,7 @@ hgApi.on('view', () => {
 
 const clickableTrack = hgApi.getTrackObject('aa', 'empty-svg-uid');
 const poly = clickableTrack.gEmpty.append('polygon');
-poly.attr('points', '0,0 10000000,10000000 0,10000000');
+const x = 100000000;
+poly.attr('points', `0,0 ${x},${x} 0,${x}`);
 </script>
 </html>
