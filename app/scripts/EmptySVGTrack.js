@@ -11,7 +11,8 @@ class EmptySVGTrack extends SVGTrack {
     const x = newXScale(0);
     const y = newYScale(0);
     const dx = newXScale(1) - x;
-    this.gEmpty.attr('transform', `translate(${x}, ${y}) scale(${dx})`);
+    const transform = `translate(${x}, ${y}) scale(${dx})`;
+    this.gEmpty.attr('transform', transform);
     this.draw();
   }
 }
